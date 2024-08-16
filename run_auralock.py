@@ -126,7 +126,6 @@ async def run():
     await scanner.stop()
 
     if not device_found:
-        subprocess.run(["notify-send", "AuraLock couldn\'t find the band. AuraLock will exit now until next restart."])
         log_message("Device not found. Exiting script.")
         sys.exit(0)  # Exit if the device is not found
 
