@@ -1,38 +1,43 @@
+---
+
 # AuraLock
 
-AuraLock is a Python-based service designed to automatically lock or unlock your Linux Mint Cinnamon desktop based on the proximity of a specific Bluetooth device (such as a fitness band). 
+AuraLock is a Python-based service that enhances the convenience of your Linux Mint Cinnamon desktop by automatically locking or unlocking the screen based on the proximity of a specified Bluetooth device, such as a fitness band or smartphone.
 
 ## Features
 
-- **Automatic Locking**: Locks the desktop if the designated Bluetooth device is out of range.
-- **Automatic Unlocking**: Unlocks the desktop if the device is within a specified range.
-- **Customizable Distance Thresholds**: Configure distance thresholds to trigger lock/unlock actions via a `config.json` file.
-- **Notification Support**: Sends desktop notifications when the screen is locked or unlocked.
-- **Systemd Service**: Runs as a background service using `systemd` to continuously monitor the Bluetooth device.
+- **Automatic Locking**: Locks your desktop when the designated Bluetooth device moves out of range.
+- **Automatic Unlocking**: Unlocks your desktop when the Bluetooth device comes back within a predefined range.
+- **Customizable Configuration**: Easily adjust distance thresholds, RSSI values, and other parameters via a user-friendly `config.json` file.
+- **Desktop Notifications**: Receive on-screen notifications when your screen is locked or unlocked.
+- **Seamless Integration**: Runs as a background service managed by `systemd`, ensuring continuous monitoring of your Bluetooth device.
 
 ## Requirements
 
-- Linux Mint (Cinnamon Desktop)
-- Python 3.7 or higher
-- Bluetooth Low Energy (BLE) support on your device
-- Systemd for managing the service
+- **Operating System**: Linux Mint (Cinnamon Desktop)
+- **Python Version**: Python 3.7 or higher
+- **Hardware**: Bluetooth Low Energy (BLE) support on your device
+- **Service Management**: `systemd` for managing the background service
 
 ## Installation
 
 ### 1. Clone the Repository
 
-Note the location where you cloned the repository! We are going to use it in the systemd service file.
+First, clone the AuraLock repository to your local machine. It’s recommended to clone it to your home directory for easier configuration.
 
 ```bash
 git clone https://github.com/BenEgeDeniz/AuraLock.git
-cd auralock
+cd AuraLock
 ```
 
 ### 2. Configure AuraLock
 
-Edit the `config.json` file to customize the distance thresholds, RSSI values, and other parameters according to your environment and preferences.
+Before running the service, you need to customize the `config.json` file. This file allows you to set the MAC address of your Bluetooth device and adjust other parameters like RSSI values and distance thresholds.
+
+Edit `config.json` to match your environment. Most users will only need to update the `TARGET_MAC_ADDRESS` with the MAC address of their Bluetooth device. The default settings should work well in most environments.
 
 Example `config.json`:
+
 ```json
 {
     "TARGET_MAC_ADDRESS": "A0:69:74:34:35:6E",
@@ -46,24 +51,23 @@ Example `config.json`:
 
 ### 3. Install Dependencies
 
-Install the required Python packages using `apt`:
+AuraLock depends on the `bleak` Python library for Bluetooth communication. Install it using `apt`:
 
 ```bash
 sudo apt install python3-bleak
 ```
 
-### 4. Create the Systemd Service
+### 4. Set Up the Systemd Service
 
-Create a `systemd` service file to run AuraLock as a background service.
+To run AuraLock as a background service, you need to create a `systemd` service file.
 
-1. Create and open the service file:
+1. Open a terminal and create the service file:
+
    ```bash
    sudo nano /etc/systemd/system/auralock.service
    ```
 
-2. Copy and paste the following content into the file:
-
-   Edit the parts with all uppercase characters and between curly braces (remove the curly braces, of course) according to your machine configuration.
+2. Copy and paste the following content into the file. Replace the placeholders in curly braces (`{}`) with the appropriate values for your system (don't forget to remove the curly braces):
 
    ```ini
    [Unit]
@@ -72,10 +76,10 @@ Create a `systemd` service file to run AuraLock as a background service.
 
    [Service]
    Type=simple
-   ExecStart=/usr/bin/python3 {THE PATH YOU CLONED THE REPOSITORY TO}/run_auralock.py
+   ExecStart=/usr/bin/python3 {PATH_TO_CLONED_REPOSITORY}/run_auralock.py
    Restart=always
    User={YOUR_USERNAME}
-   WorkingDirectory=/home/{YOUR_USERNAME}/auralock
+   WorkingDirectory={PATH_TO_CLONED_REPOSITORY}
    Environment="DISPLAY=:0"
    Environment="XAUTHORITY=/home/{YOUR_USERNAME}/.Xauthority"
    StandardOutput=journal
@@ -86,18 +90,26 @@ Create a `systemd` service file to run AuraLock as a background service.
    WantedBy=multi-user.target
    ```
 
-4. Save and exit the file.
+   - **`PATH_TO_CLONED_REPOSITORY`**: The directory where you cloned the AuraLock repository.
+   - **`YOUR_USERNAME`**: Your Linux username.
 
-### 5. Enable and Start the Service
+3. Save and close the file.
 
-Enable and start the AuraLock service:
+### 5. Enable and Start AuraLock
+
+To start AuraLock automatically at boot, enable the service:
 
 ```bash
 sudo systemctl enable auralock.service
+```
+
+Start the service immediately:
+
+```bash
 sudo systemctl start auralock.service
 ```
 
-You can check the status of the service with:
+To check the status of the service and ensure it’s running correctly, use:
 
 ```bash
 sudo systemctl status auralock.service
@@ -105,18 +117,22 @@ sudo systemctl status auralock.service
 
 ### 6. Troubleshooting
 
-If you encounter issues such as missing notifications, ensure that your notification daemon (e.g., `dunst`) is installed and running. You can install it using:
+If you encounter issues, such as missing notifications, make sure your system's notification daemon is installed and running. For example, you can install `dunst` using:
 
 ```bash
 sudo apt install dunst
 ```
 
-To view the logs generated by AuraLock, use:
+To view logs generated by AuraLock, which can help with troubleshooting:
 
 ```bash
 sudo journalctl -u auralock.service
 ```
 
+If the screen locks unexpectedly, even when the device is within range, consider increasing the `TIME_THRESHOLD_SECONDS` parameter in your `config.json`. This can help mitigate potential Bluetooth interference.
+
 ## Contributing
 
-Contributions are welcome! Feel free to submit issues or pull requests to improve AuraLock.
+Contributions to AuraLock are welcome! Whether it's reporting bugs, suggesting improvements, or submitting code, your input is valuable. Feel free to open issues or pull requests on the GitHub repository.
+
+---
