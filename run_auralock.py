@@ -48,11 +48,12 @@ def lock_screen():
     """
     Lock the Cinnamon desktop screen.
     """
-    subprocess.run(["cinnamon-screensaver-command", "--lock"])
-    subprocess.run(["notify-send", "AuraLock locked the screen."])
     global screen_locked
-    screen_locked = True
-    log_message("Screen locked.")
+    if not screen_locked:
+        subprocess.run(["cinnamon-screensaver-command", "--lock"])
+        subprocess.run(["notify-send", "AuraLock locked the screen."])
+        screen_locked = True
+        log_message("Screen locked.")
 
 def unlock_screen():
     """
